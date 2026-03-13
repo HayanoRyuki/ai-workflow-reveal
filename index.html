@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIワークフローエンジンのご提案 | メディア・コンフィデンス</title>
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+  :root {
+    --navy: #1a237e;
+    --blue: #4267f5;
+    --blue-light: #7b9cf7;
+    --lavender: #e8eaf6;
+    --ice: #e0f4ff;
+    --ice-soft: #f0f7ff;
+    --white: #ffffff;
+    --gray: #666666;
+    --gray-light: #999999;
+    --text: #333333;
+    --grad-blue: linear-gradient(135deg, #4267f5, #7b9cf7);
+  }
+
+  .reveal {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 26px;
+    color: var(--text);
+  }
+
+  .reveal h1, .reveal h2, .reveal h3 {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 900;
+    color: var(--navy);
+    text-transform: none;
+    letter-spacing: -0.02em;
+  }
+  .reveal h1 { font-size: 2.0em; }
+  .reveal h2 { font-size: 1.4em; margin-bottom: 0.5em; }
+  .reveal h3 { font-size: 1.0em; color: var(--navy); }
+
+  .reveal .slide-number { font-size: 14px; color: var(--gray-light); right: 20px; bottom: 12px; }
+
+  /* kill ALL default reveal padding */
+  .reveal .slides > section,
+  .reveal .slides > section > section {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ========== HEADER BAR ========== */
+  .slide-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 58px;
+    background: var(--lavender);
+    border-bottom: 3px solid var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 48px;
+    font-size: 0.65em;
+    z-index: 10;
+  }
+  .slide-header .section-title { font-weight: 700; color: var(--navy); }
+  .slide-header .company-name { display: none; }
+
+  /* ========== FOOTER (company name bottom-left) ========== */
+  .slide-footer {
+    position: absolute;
+    bottom: 12px; left: 48px;
+    font-size: 0.45em;
+    color: var(--gray-light);
+    font-weight: 700;
+    z-index: 10;
+  }
+
+  /* content area below header */
+  .has-header {
+    padding: 72px 48px 20px 48px !important;
+    text-align: left;
+  }
+  .has-header h2 { text-align: left; }
+
+  /* ========== SPLIT LAYOUT: content left + photo right ========== */
+  .split-slide {
+    display: flex !important;
+    flex-direction: row !important;
+    padding: 0 !important;
+    height: 100%;
+  }
+  .split-slide .slide-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+  }
+  .split-content {
+    flex: 1;
+    padding: 72px 36px 20px 48px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .split-content h2 { text-align: left; }
+  .split-photo {
+    width: 340px;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ========== COVER with bg photo ========== */
+  .cover-slide {
+    background: linear-gradient(135deg, rgba(26,35,126,0.82), rgba(66,103,245,0.72)), url('images/img-016.jpg') center/cover no-repeat;
+    text-align: left;
+    padding: 0 80px !important;
+    color: white;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .cover-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    color: white;
+    font-size: 0.55em;
+    font-weight: 700;
+    padding: 6px 20px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255,255,255,0.3);
+    align-self: flex-start;
+  }
+  .cover-slide h1 {
+    font-size: 1.7em;
+    line-height: 1.5;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .cover-subtitle {
+    font-size: 0.7em;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 40px;
+  }
+  .cover-company {
+    font-size: 0.7em;
+    color: rgba(255,255,255,0.95);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+  }
+
+  /* ========== IMPACT ========== */
+  .impact-heading {
+    font-size: 1.5em !important;
+    line-height: 1.35;
+    color: var(--navy) !important;
+  }
+
+  /* ========== BA (before-after) ========== */
+  .ba-container {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 18px;
+  }
+  .ba-box {
+    flex: 1;
+    background: var(--ice-soft);
+    border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .ba-box.input-box { border: 2px solid var(--blue); }
+  .ba-box.output-box { border: 2px solid var(--navy); }
+  .ba-label {
+    font-weight: 700;
+    font-size: 0.6em;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+  .ba-box.output-box .ba-label { color: var(--navy); }
+  .ba-arrow { font-size: 1.6em; color: var(--blue-light); }
+  .ba-note {
+    margin-top: 16px;
+    font-size: 0.6em;
+    color: var(--gray);
+  }
+
+  /* ========== SCATTER → CONVERGE layout (slide 2) ========== */
+  .scatter-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 14px;
+  }
+  .scatter-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex-shrink: 0;
+    width: 340px;
+  }
+  .scatter-card {
+    background: white;
+    border: 2px solid var(--blue);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.68em;
+  }
+  .scatter-card .field-key {
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .scatter-card .field-val {
+    font-weight: 900;
+    color: var(--navy);
+    font-size: 1.05em;
+  }
+  .converge-arrow {
+    flex-shrink: 0;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .converge-arrow svg {
+    width: 60px;
+    height: 120px;
+  }
+  .output-result {
+    flex: 1;
+    background: var(--ice-soft);
+    border: 2px solid var(--navy);
+    border-radius: 10px;
+    padding: 20px 22px;
+    position: relative;
+  }
+  .output-result .ba-label { color: var(--navy); }
+
+  /* ========== VIDEO PLACEHOLDER ========== */
+  .video-placeholder {
+    width: 700px;
+    height: 394px;
+    background: linear-gradient(135deg, var(--navy) 0%, #303f9f 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.1em;
+    margin: 20px auto 0;
+    letter-spacing: 0.15em;
+  }
+
+  /* ========== PRODUCT GRID ========== */
+  .product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+    font-size: 0.68em;
+  }
+  .product-card {
+    background: var(--ice-soft);
+    border-radius: 8px;
+    padding: 18px;
+    text-align: center;
+    border: 2px solid var(--blue);
+  }
+  .product-card strong { display: block; margin-bottom: 4px; color: var(--navy); font-size: 1.05em; }
+  .product-card span { color: var(--gray); font-size: 0.9em; }
+  .product-card .product-icon { color: var(--blue); margin-bottom: 6px; opacity: 0.7; }
+
+  /* ========== ARCHITECTURE ========== */
+  .arch-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .arch-box {
+    background: var(--ice-soft);
+    border-radius: 10px;
+    padding: 20px 22px;
+    text-align: center;
+    min-width: 180px;
+    border: 2px solid var(--blue);
+  }
+  .arch-box.claude { border-color: var(--navy); }
+  .arch-box.temporal { border-color: var(--blue); }
+  .arch-box.mcp { border-color: var(--blue-light); }
+  .arch-box h3 { margin: 0 0 6px 0; font-size: 1.0em; }
+  .arch-box p { margin: 0; font-size: 0.68em; color: var(--gray); line-height: 1.5; }
+  .arch-connector { font-size: 1.3em; color: var(--blue-light); font-weight: 700; }
+
+  /* ========== COMPARISON ROWS ========== */
+  .compare-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .compare-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .compare-label {
+    width: 90px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.72em;
+    color: var(--navy);
+    background: var(--lavender);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .compare-pair {
+    flex: 1;
+    display: flex;
+    gap: 10px;
+  }
+  .compare-cell {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.68em;
+    line-height: 1.6;
+  }
+  .compare-cell.other {
+    background: #f5f5f5;
+    color: var(--gray);
+    border: 2px solid #ccc;
+    position: relative;
+    overflow: hidden;
+  }
+  .compare-cell.other::after {
+    content: '✕';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3.5em;
+    color: rgba(0,0,0,0.04);
+    font-weight: 900;
+    pointer-events: none;
+  }
+  .compare-cell.mc {
+    background: var(--ice-soft);
+    color: var(--navy);
+    font-weight: 700;
+    border: 2px solid var(--blue);
+    position: relative;
+    overflow: hidden;
+  }
+  .compare-cell.mc::after {
+    content: '○';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3.5em;
+    color: rgba(66,103,245,0.07);
+    font-weight: 900;
+    pointer-events: none;
+  }
+  .compare-cell .cell-tag {
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+  .compare-cell.other .cell-tag { color: #aaa; }
+  .compare-cell.mc .cell-tag { color: var(--blue); }
+
+  /* ========== PATTERN CARDS ========== */
+  .pattern-cards {
+    display: flex;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .pattern-card {
+    flex: 1;
+    background: var(--ice-soft);
+    border-radius: 10px;
+    padding: 18px 16px;
+    text-align: center;
+    border: 2px solid var(--blue);
+  }
+  .pattern-card:nth-child(2) { border-color: var(--navy); }
+  .pattern-card:nth-child(3) { border-color: var(--blue-light); }
+  .pattern-card .pattern-label { font-size: 0.55em; color: var(--blue); font-weight: 700; letter-spacing: 0.08em; }
+  .pattern-card .pattern-num { font-size: 1.5em; font-weight: 900; color: var(--navy); margin: 2px 0 8px; }
+  .pattern-card p { font-size: 0.68em; color: var(--gray); margin: 0; line-height: 1.7; text-align: left; }
+
+  /* ========== PROFILE ========== */
+  .profile-section {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+    text-align: left;
+    margin-top: 18px;
+  }
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: var(--lavender);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55em;
+    color: var(--gray);
+    flex-shrink: 0;
+  }
+  .profile-text { flex: 1; }
+  .profile-text h3 { margin-top: 0; font-size: 1.1em; }
+  .profile-text p { font-size: 0.72em; color: var(--gray); line-height: 1.8; }
+
+  /* ========== PRICING ========== */
+  .pricing-box {
+    background: var(--ice-soft);
+    border-radius: 10px;
+    padding: 24px 32px;
+    display: inline-block;
+    margin-top: 12px;
+    text-align: center;
+    border: 2px solid var(--blue);
+  }
+  .pricing-box .price { font-size: 1.8em; font-weight: 900; color: var(--navy); }
+  .pricing-box .price-note { font-size: 0.6em; color: var(--gray); margin-top: 4px; }
+
+  /* ========== FLOW STEPS (chevron) ========== */
+  .flow-steps {
+    display: flex;
+    gap: 0;
+    margin-top: 22px;
+    font-size: 0.62em;
+  }
+  .flow-step {
+    background: var(--blue);
+    color: white;
+    padding: 14px 22px 14px 30px;
+    text-align: center;
+    flex: 1;
+    max-width: 200px;
+    position: relative;
+    clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 50%, calc(100% - 16px) 100%, 0% 100%, 16px 50%);
+  }
+  .flow-step:first-child {
+    clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 50%, calc(100% - 16px) 100%, 0% 100%);
+    padding-left: 18px;
+    border-radius: 6px 0 0 6px;
+  }
+  .flow-step:last-child {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 16px 50%);
+    border-radius: 0 6px 6px 0;
+  }
+  .flow-step:nth-child(1) { background: var(--navy); }
+  .flow-step:nth-child(2) { background: #303f9f; }
+  .flow-step:nth-child(3) { background: var(--blue); }
+  .flow-step:nth-child(4) { background: var(--blue-light); }
+  .flow-step .step-num { font-size: 0.75em; opacity: 0.7; margin-bottom: 2px; }
+
+  /* ========== CTA with bg photo ========== */
+  .cta-bg {
+    background: linear-gradient(135deg, rgba(26,35,126,0.85), rgba(66,103,245,0.78)), url('images/img-028.jpg') center/cover no-repeat;
+    color: white;
+  }
+  .cta-bg h2 { color: white !important; }
+  .cta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 0.82em;
+    color: rgba(255,255,255,0.95);
+    line-height: 1.6;
+  }
+  .cta-item i { color: #90caf9; }
+  .cta-item strong { color: #90caf9; }
+
+  /* ========== CONTACT with bg photo ========== */
+  .contact-bg {
+    background: linear-gradient(135deg, rgba(26,35,126,0.88), rgba(48,63,159,0.82)), url('images/img-014.jpg') center/cover no-repeat;
+    padding: 72px 48px 20px 48px !important;
+    text-align: center;
+    color: white;
+  }
+  .contact-bg h2 { color: white !important; text-align: center; }
+  .contact-bg .cover-tag {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .contact-info { margin-top: 24px; font-size: 0.75em; line-height: 2.2; text-align: center; }
+  .contact-info a { color: #90caf9; text-decoration: none; }
+
+  .sub-desc { font-size: 0.7em; color: var(--gray); margin-bottom: 14px; }
+
+  /* ========== BA BOX ICON ========== */
+  .ba-icon {
+    float: right;
+    margin: -6px -6px 0 12px;
+    opacity: 0.35;
+  }
+
+  /* ========== INPUT FIELD CHIPS ========== */
+  .input-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+    align-items: start;
+  }
+  .input-field {
+    background: white;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.72em;
+  }
+  .input-field .field-key {
+    font-size: 0.78em;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .input-field .field-val {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 1.05em;
+  }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ==================== SLIDE 1: COVER (bg: buildings + sky) ==================== -->
+<section class="cover-slide">
+  <div class="cover-tag">AI搭載型 営業マーケPR効率化エンジン</div>
+  <h1>AIワークフローエンジンで<br>営業・マーケ・PR業務を<br>効率化するご提案</h1>
+  <div class="cover-subtitle">Claude × Temporal によるフルプロセスAI実装</div>
+  <div class="cover-company">株式会社 <span style="font-size:1.3em;">メディア・コンフィデンス</span></div>
+</section>
+
+<!-- ==================== SLIDE 2: IMPACT (split: content + data photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">提案資料メーカー</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2 class="impact-heading">ヒアリングメモを入れると<br>10分で提案資料の初稿が出ます</h2>
+
+    <div class="scatter-flow">
+      <!-- 4枚のバラバラカード -->
+      <div class="scatter-inputs">
+        <div class="scatter-card">
+          <div class="field-key"><i data-lucide="building-2" width="14" height="14" style="vertical-align:-2px; margin-right:4px;"></i>顧客名</div>
+          <div class="field-val">株式会社〇〇</div>
+        </div>
+        <div class="scatter-card">
+          <div class="field-key"><i data-lucide="alert-circle" width="14" height="14" style="vertical-align:-2px; margin-right:4px;"></i>課題</div>
+          <div class="field-val">メルマガが属人化</div>
+        </div>
+        <div class="scatter-card">
+          <div class="field-key"><i data-lucide="coins" width="14" height="14" style="vertical-align:-2px; margin-right:4px;"></i>予算感</div>
+          <div class="field-val">月20〜30万</div>
+        </div>
+        <div class="scatter-card">
+          <div class="field-key"><i data-lucide="user-check" width="14" height="14" style="vertical-align:-2px; margin-right:4px;"></i>決裁者</div>
+          <div class="field-val">マーケ部長</div>
+        </div>
+      </div>
+
+      <!-- 収束する矢印 -->
+      <div class="converge-arrow">
+        <svg viewBox="0 0 60 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 10 Q20 55 50 60" stroke="#7b9cf7" stroke-width="2" fill="none"/>
+          <path d="M5 45 Q20 55 50 60" stroke="#7b9cf7" stroke-width="2" fill="none"/>
+          <path d="M5 75 Q20 65 50 60" stroke="#7b9cf7" stroke-width="2" fill="none"/>
+          <path d="M5 110 Q20 65 50 60" stroke="#7b9cf7" stroke-width="2" fill="none"/>
+          <polygon points="48,55 58,60 48,65" fill="#7b9cf7"/>
+        </svg>
+      </div>
+
+      <!-- OUTPUT -->
+      <div class="output-result">
+        <i data-lucide="file-check-2" class="ba-icon" style="color:var(--navy);" width="56" height="56"></i>
+        <div class="ba-label">OUTPUT</div>
+        <div style="font-weight:900; color:var(--navy); font-size:1.1em; margin-bottom:8px;">提案資料PDF（12ページ）</div>
+        <div style="font-size:0.65em; color:var(--gray); line-height:1.8;">
+          課題整理 → 解決策 → 実装計画<br>→ 料金 → スケジュール
+        </div>
+      </div>
+    </div>
+
+    <div class="ba-note">企画 → リサーチ → 構成 → ドラフト → チェックまで自動で回ります</div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-015.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 3: DEMO VIDEO ==================== -->
+<section class="has-header">
+  <div class="slide-header">
+    <span class="section-title">提案資料メーカー</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+
+  <h2>実際の操作画面</h2>
+  <!-- 動画ができたら差し替え: <video data-autoplay src="demo.mp4" style="width:700px; border-radius:10px;"></video> -->
+  <div class="video-placeholder">DEMO COMING SOON</div>
+  <p style="font-size:0.6em; color:var(--gray-light); margin-top:14px; text-align:center;">
+    ※ 操作デモ動画は準備中です。完成次第ここに埋め込みます
+  </p>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 4: PRODUCT LINEUP (split: grid + presentation photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">プロダクト一覧</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>提案資料だけじゃありません</h2>
+    <p class="sub-desc">同じ仕組みで、営業・マーケ・PRの主要業務を全部回します</p>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <i data-lucide="file-text" class="product-icon" width="28" height="28"></i>
+        <strong>提案資料メーカー</strong>
+        <span>ヒアリングメモ → 提案PDF</span>
+      </div>
+      <div class="product-card">
+        <i data-lucide="mic" class="product-icon" width="28" height="28"></i>
+        <strong>セミナーメーカー</strong>
+        <span>テーマ設定 → 台本・スライド・配信</span>
+      </div>
+      <div class="product-card">
+        <i data-lucide="mail" class="product-icon" width="28" height="28"></i>
+        <strong>メルマガメーカー</strong>
+        <span>ネタ投入 → 原稿・配信・ABテスト</span>
+      </div>
+      <div class="product-card">
+        <i data-lucide="globe" class="product-icon" width="28" height="28"></i>
+        <strong>サイトメーカー</strong>
+        <span>設計指示 → ページ生成・公開・改善</span>
+      </div>
+      <div class="product-card">
+        <i data-lucide="help-circle" class="product-icon" width="28" height="28"></i>
+        <strong>ヘルプ記事メーカー</strong>
+        <span>問い合わせログ → FAQ自動生成</span>
+      </div>
+      <div class="product-card">
+        <i data-lucide="megaphone" class="product-icon" width="28" height="28"></i>
+        <strong>広告LP</strong>
+        <span>訴求軸 → LP生成・ABテスト</span>
+      </div>
+    </div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-018.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 5: ARCHITECTURE (split: diagram + tech illustration) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">技術基盤</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>なぜこれが可能か</h2>
+    <p class="sub-desc">Claude × Temporal — AIが考え、ワークフローエンジンが手順を回す</p>
+
+    <div class="arch-diagram" style="flex-direction:column; align-items:stretch;">
+      <div class="arch-box claude">
+        <h3>Claude（Anthropic AI）</h3>
+        <p>判断・生成・チェック — 思考を担う</p>
+      </div>
+      <div style="text-align:center; font-size:1.2em; color:var(--blue-light); font-weight:700;">×</div>
+      <div class="arch-box temporal">
+        <h3>Temporal（ワークフローエンジン）</h3>
+        <p>手順の制御・ツール接続・エラー時の自動リトライ</p>
+      </div>
+      <div style="text-align:center; font-size:1.2em; color:var(--blue-light); font-weight:700;">+</div>
+      <div class="arch-box mcp">
+        <h3>MCP（外部ツール連携）</h3>
+        <p>Notion / Slack / Google Drive 等に接続</p>
+      </div>
+    </div>
+
+    <p style="font-size:0.58em; color:var(--gray); margin-top:16px;">
+      個々のAIツールが優秀かどうかではなく、プロセス全体がつながっているかどうか
+    </p>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-004.png'); background-color: #0d1b3e;"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 6: VS SAAS (split: cards + tablet photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">他社比較</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>既存SaaSとの違い</h2>
+
+    <div class="compare-rows">
+      <div class="compare-row">
+        <div class="compare-label">カスタ<br>マイズ</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">フルSaaS</div><br>全社共通。合わなければ我慢</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>御社の業務フローに合わせて設計</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">対象<br>範囲</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">フルSaaS</div><br>1つの業務に特化</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>提案資料〜サイトまで横断</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">AI活用</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">フルSaaS</div><br>SaaS側が決めた使い方のみ</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>御社のプロセスに最適化</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">データ</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">フルSaaS</div><br>SaaS側に蓄積</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>御社の環境に蓄積</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-019.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 7: VS CHATGPT (split: cards + calculator photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">他社比較</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>「ChatGPTで自分でやる」との違い</h2>
+
+    <div class="compare-rows">
+      <div class="compare-row">
+        <div class="compare-label">範囲</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">ChatGPT</div><br>ドラフト生成だけ（点）</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>企画〜検証まで全工程（面）</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">品質</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">ChatGPT</div><br>プロンプト次第でバラつく</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>基準を設計に組み込むから安定</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">引き継ぎ</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">ChatGPT</div><br>あの人しかできない</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>プロセスに組み込むから誰でも</div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-label">継ぎ目</div>
+        <div class="compare-pair">
+          <div class="compare-cell other"><div class="cell-tag">ChatGPT</div><br>コピペ・手作業が残る</div>
+          <div class="compare-cell mc"><div class="cell-tag">MC</div><br>ツール間を自動接続</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-017.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 8: SEMINAR EXAMPLE (split: BA + presenter photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">セミナーメーカー</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>もう1つの例：セミナーメーカー</h2>
+
+    <div class="ba-container" style="flex-direction:column; gap:14px;">
+      <div class="ba-box input-box" style="max-width:100%;">
+        <i data-lucide="settings" class="ba-icon" style="color:var(--blue);" width="64" height="64"></i>
+        <div class="ba-label">INPUT</div>
+        <div style="font-size:0.76em; text-align:left; line-height:1.9;">
+          テーマ: AIワークフロー入門　/　対象: 中小企業の経営者　/　形式: オンライン 30分
+        </div>
+      </div>
+      <div style="text-align:center; font-size:1.4em; color:var(--blue-light);">↓</div>
+      <div class="ba-box output-box" style="max-width:100%;">
+        <i data-lucide="presentation" class="ba-icon" style="color:var(--navy);" width="64" height="64"></i>
+        <div class="ba-label">OUTPUT</div>
+        <div style="font-size:0.76em; text-align:left; line-height:1.9;">
+          台本（トークスクリプト）/ スライド一式 / 告知文・集客メール / 事後フォローメール
+        </div>
+      </div>
+    </div>
+
+    <div class="ba-note">提案資料と同じ仕組みで、セミナーの企画〜運用まで自動で回ります</div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-024.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 9: PATTERNS (split: cards + meeting photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">導入パターン</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>導入パターン</h2>
+
+    <div class="pattern-cards" style="flex-direction:column; gap:12px;">
+      <div class="pattern-card" style="display:flex; align-items:center; gap:16px; text-align:left;">
+        <div style="font-size:1.4em; font-weight:900; color:var(--navy); min-width:40px; text-align:center;">A</div>
+        <p style="margin:0;">まず<strong>提案資料メーカー</strong>だけ導入 → 効果を確認 → メルマガ・セミナーに展開</p>
+      </div>
+      <div class="pattern-card" style="display:flex; align-items:center; gap:16px; text-align:left; border-color:var(--navy);">
+        <div style="font-size:1.4em; font-weight:900; color:var(--navy); min-width:40px; text-align:center;">B</div>
+        <p style="margin:0;"><strong>提案資料 + メルマガ</strong>を同時導入 → 営業〜ナーチャリングを一気通貫で自動化</p>
+      </div>
+      <div class="pattern-card" style="display:flex; align-items:center; gap:16px; text-align:left; border-color:var(--blue-light);">
+        <div style="font-size:1.4em; font-weight:900; color:var(--navy); min-width:40px; text-align:center;">C</div>
+        <p style="margin:0;"><strong>6プロダクト全部</strong>を段階導入 → 営業マーケPR業務を丸ごとAI化</p>
+      </div>
+    </div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-020.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 10: PROFILE (split: profile + meeting photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">代表プロフィール</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>つくっている人間</h2>
+
+    <div class="profile-section">
+      <div class="profile-photo">PHOTO</div>
+      <div class="profile-text">
+        <h3>早野 龍輝（はやの りゅうき）</h3>
+        <p>
+          株式会社メディア・コンフィデンス 代表取締役<br><br>
+          東大文学部 → 大手出版社で4年間に36冊の書籍を企画出版<br>
+          → 2015年独立。メディア業界10年<br>
+          → 2025年〜 AIシステム基盤の設計・開発・提供<br><br>
+          「コンテンツを企画し、つくり、届ける」プロセスの全体像を<br>
+          体感で知っている。だからAIでプロセスを設計するとき、<br>
+          机上の空論にならない。
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-023.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 11: PRICING (split: pricing + women meeting photo) ==================== -->
+<section class="split-slide">
+  <div class="slide-header">
+    <span class="section-title">料金・導入ステップ</span>
+    <span class="company-name">メディア・コンフィデンス</span>
+  </div>
+  <div class="split-content">
+    <h2>料金・導入の流れ</h2>
+
+    <div style="text-align:center;">
+      <div class="pricing-box">
+        <div style="font-size:0.6em; color:var(--gray);">初期費用</div>
+        <div class="price" style="font-size:1.5em;">0円</div>
+        <div style="margin-top:12px; font-size:0.6em; color:var(--gray);">月額</div>
+        <div class="price">20〜30万円</div>
+        <div class="price-note">※ プロダクト・カスタマイズ範囲により変動</div>
+      </div>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num">STEP 1</div>
+        <strong>ヒアリング</strong><br>
+        業務フローを把握
+      </div>
+      <div class="flow-step">
+        <div class="step-num">STEP 2</div>
+        <strong>設計</strong><br>
+        ワークフロー設計
+      </div>
+      <div class="flow-step">
+        <div class="step-num">STEP 3</div>
+        <strong>実装</strong><br>
+        システム構築
+      </div>
+      <div class="flow-step">
+        <div class="step-num">STEP 4</div>
+        <strong>運用・改善</strong><br>
+        継続サポート
+      </div>
+    </div>
+  </div>
+  <div class="split-photo" style="background-image: url('images/img-025.jpg');"></div>
+  <div class="slide-footer">© Media-Confidence, inc.</div>
+</section>
+
+<!-- ==================== SLIDE 12: CTA + CONTACT (bg photo) ==================== -->
+<section class="split-slide">
+  <!-- 左: CTA（背景写真付き） -->
+  <div class="split-content" style="background:linear-gradient(135deg, rgba(26,35,126,0.85), rgba(66,103,245,0.78)), url('images/img-028.jpg') center/cover no-repeat; color:white; padding:48px 44px; justify-content:center;">
+    <h2 style="text-align:left; font-size:1.3em; margin-bottom:0; line-height:1.5; color:white !important;">まず提案資料メーカーを<br>1回試してみてください</h2>
+
+    <div style="display:flex; flex-direction:column; gap:16px; margin-top:28px;">
+      <div class="cta-item">
+        <i data-lucide="badge-check" width="20" height="20" style="flex-shrink:0; margin-top:2px;"></i>
+        <span><strong>無料</strong>でお試しいただけます</span>
+      </div>
+      <div class="cta-item">
+        <i data-lucide="file-input" width="20" height="20" style="flex-shrink:0; margin-top:2px;"></i>
+        <span>御社のヒアリングメモを1件お預かりして<br>実際に資料を生成します</span>
+      </div>
+      <div class="cta-item">
+        <i data-lucide="layers" width="20" height="20" style="flex-shrink:0; margin-top:2px;"></i>
+        <span>気に入っていただけたら<br>他のプロダクトもご案内します</span>
+      </div>
+      <div class="cta-item">
+        <i data-lucide="users" width="20" height="20" style="flex-shrink:0; margin-top:2px;"></i>
+        <span>周りにも使えそうな会社があれば<br>ぜひご紹介ください</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右: CONTACT -->
+  <div class="split-photo" style="background:linear-gradient(135deg, rgba(26,35,126,0.92), rgba(48,63,159,0.88)), url('images/img-014.jpg') center/cover no-repeat; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:40px 28px; width:400px;">
+    <div class="cover-tag" style="margin-bottom:14px; font-size:0.5em;">AI搭載型 営業マーケPR効率化エンジン</div>
+    <div style="font-size:1.05em; font-weight:900; color:white; margin-bottom:24px;">AIワークフローエンジン</div>
+
+    <div style="font-size:0.68em; color:rgba(255,255,255,0.95); line-height:2.0;">
+      <strong style="color:white; font-size:1.1em;">株式会社メディア・コンフィデンス</strong><br>
+      代表取締役　早野 龍輝<br><br>
+      <a href="mailto:hayano@media-confidence.com" style="color:#90caf9; text-decoration:none;">hayano@media-confidence.com</a><br>
+      X: <a href="https://twitter.com/hayano_mc2015" target="_blank" style="color:#90caf9; text-decoration:none;">@hayano_mc2015</a><br>
+      note: <a href="https://note.com/hayanomc2015" target="_blank" style="color:#90caf9; text-decoration:none;">note.com/hayanomc2015</a>
+    </div>
+
+    <div style="margin-top:20px; font-size:0.5em; color:rgba(255,255,255,0.4);">
+      〒150-0043 東京都渋谷区道玄坂1-10-8<br>渋谷道玄坂東急ビル 2F-C
+    </div>
+  </div>
+
+  <div class="slide-footer" style="color:rgba(255,255,255,0.5);">© Media-Confidence, inc.</div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: true,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  width: 1280,
+  height: 720,
+  margin: 0,
+  center: false,
+});
+lucide.createIcons();
+</script>
+</body>
+</html>
